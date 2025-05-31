@@ -38,9 +38,7 @@ if not os.path.exists(model_path):
 
 # Load model with optimizations
 model = YOLO(model_path, task='detect')
-# Filter to only person class (class 0 in COCO dataset)
-model.model[-1].nc = 1  # Set number of classes to 1 (person only)
-labels = {0: 'person'}  # Only person class
+labels = model.names  # Keep original class names
 
 img_exts = ['.jpg','.jpeg','.png','.bmp']
 vid_exts = ['.avi','.mov','.mp4','.mkv']
