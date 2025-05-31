@@ -31,7 +31,7 @@ if not os.path.exists(model_path):
     sys.exit(0)
 
 model = YOLO(model_path, task='detect')
-model.classes = [0]  # Only detect "person"
+labels = model.names  # class names
 
 img_exts = ['.jpg','.jpeg','.png','.bmp']
 vid_exts = ['.avi','.mov','.mp4','.mkv','.wmv']
@@ -104,12 +104,15 @@ while True:
 
     object_count = 0
     for box in detections:
+        classidx = int(box.cls.item())
+        if classidx != 0:  # Only detect "person"
+            continue
+
         conf = box.conf.item()
         if conf < conf_thresh:
             continue
 
         x1, y1, x2, y2 = map(int, box.xyxy.flatten().tolist())
-        classidx = int(box.cls.item())
         label = f"person: {int(conf * 100)}%"
         color = (0, 255, 0)
 
@@ -130,8 +133,11 @@ while True:
         cv2.putText(frame, f'FPS: {avg_fps:.2f}', (10, 20),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
 
+    cv2.putText(frame, f'People detected: {object_count}', (10, 40),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+
     if not nogui:
-        cv2.imshow("YOLOv8 Detection", frame)
+        cv2.imshow("YOLOv8 Person Detection", frame)
 
     if record:
         recorder.write(frame)
