@@ -2,11 +2,21 @@ import cv2
 import numpy as np
 import time
 from tflite_runtime.interpreter import Interpreter
+import RPi.GPIO as GPIO
 
 #Variables
 camera_index = 0
 score_margin = 0.3
 screen_size = (192, 192)
+
+pin_h = 20 #Corresponds to pin 40 on the pi
+pin_v = 21 #Corresponds to pin 38 on the pi
+
+#Configure GPIO
+GPIO.setmode(GPIO.BCM)
+
+GPIO.setup(pin_h, GPIO.OUT)
+GPIO.setup(pin_v, GPIO.OUT)
 
 #Load MoveNet
 
@@ -58,6 +68,9 @@ while True:
 		x_avg = int(x_avg / avg_length)
 		y_avg = int(y_avg / avg_length)	
 		
+		GPIO.output(pin_h, GPIO.HIGH if x_avg > int(w/2) else GPIO.LOW)
+		GPIO.output(pin_v, GPIO.HIGH if y_avg > int(h/2) else GPIO.LOW)
+		
 		cv2.circle(frame, (x_avg, y_avg), 10, (255, 0, 0), -1)
 		
 	cv2.imshow("MoveNet Detection", frame)
@@ -67,4 +80,4 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
-
+GPIO.cleanup()
